@@ -53,6 +53,7 @@ public class Game1 : Game
     // för spelare 1.
     private int KortSomSkaUp = 0;
     private int VilkenSpelare = 1;
+    private int NärDuTarFrånSjön;
     private Rectangle SPV = new Rectangle();
     private bool Space = true;
 
@@ -175,8 +176,30 @@ public class Game1 : Game
                     }  
                 }
                 if(Part_b==3){// du tar kort från den spelaren.
-
+                    int VadSkaHända = HarDeDetKortet(SL[VilkenSpelare].hand,SL[0].hand[KortSomSkaUp].Kort,VilkenSpelare);
+                    if(VadSkaHända==0){
+                        if(Sjön.Count>0){ // här är jag nu 
+                        a
+                            NärDuTarFrånSjön=ran.Next(0,Sjön.Count);
+                            Part_a=10;
+                            Part_b=0;
+                        }
+                        /* 
+                            det är 0 så hade de inte kortet o man ska 
+                            ta från sjön så det ska vara en animation för det. 
+                            med hjälp av part_a så ska animationen ut föras.
+                            då ska även part_b ändras för jag ska försöka att ha all animation
+                            i samma part_a.
+                        */
+                    }
                 }
+            }
+        }
+
+        if(Part_a==10){ // animation.
+            if(Part_b==0){ // för sjön. 
+                // och här
+                a
             }
         }
 
@@ -189,12 +212,13 @@ public class Game1 : Game
         base.Update(gameTime);
     }
 
-    static void TaKortFrånSpelare(List<Spelare> SL, int DittKort, int Spelare){
-        // Nu funkar den bara för 1 spelare.
-        bool HarDeDittKort = false;
-        foreach(Kortvisuel k in SL[Spelare].hand){
-            
+    static int HarDeDetKortet(List<Kortvisuel> Hand, string Kort, int spelare){// om det kortet finns i den handen.
+        foreach(Kortvisuel k in Hand){
+            if(k.Kort == Kort){
+                return spelare;
+            }
         }
+        return 0;
     }
 
     protected override void Draw(GameTime gameTime)
