@@ -25,3 +25,4 @@ C:\Users\alle07002\OneDrive - Växjö kommun\Skrivbordet\program\Version4_finns_
 C:\Users\alle07002\OneDrive - Växjö kommun\Skrivbordet\program\Version4_finns_i_sjon\obj\Debug\net8.0-windows\Version4_finns_i_sjon.genruntimeconfig.cache
 C:\Users\alle07002\OneDrive - Växjö kommun\Skrivbordet\program\Version4_finns_i_sjon\obj\Debug\net8.0-windows\ref\Version4_finns_i_sjon.dll
 C:\Users\alle07002\OneDrive - Växjö kommun\Skrivbordet\program\Version4_finns_i_sjon\bin\Debug\net8.0-windows\Content\myfont.xnb
+C:\Users\alle07002\OneDrive - Växjö kommun\Skrivbordet\program\Version4_finns_i_sjon\obj\Debug\net8.0-windows\Version4_finns_i_sjon.sourcelink.json
