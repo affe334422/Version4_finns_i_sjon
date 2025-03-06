@@ -60,6 +60,25 @@ public class Game1 : Game
     private int anix;
     private int aniy;
 
+    /*
+        för att säta "kapitel"
+        För att hitta alla delar där man kan se vad de andra frågar efter.
+        Den är bra att ha för när om jag ska göra en smartare bot. 
+            k423    tryck change all ocurenses för att hitta den.
+
+        för sl[0].posikort. den har avvänds lite fel för den var ingenteligen planerad att användas 
+        för att visa positionen av det kort i din hand och inte i deras hand men men. bara bra att minnas.
+
+        för att göra det med rutan som skriver vad de gör.
+            k555
+        k555 är för att visa var all information.
+            vem som frågar.
+            vem den frågar.
+            vilket kort.
+            och hur många de hade eller om de plockade från sjön.
+        
+    */
+
     protected override void Update(GameTime gameTime)
     {
         if(Start){
@@ -118,6 +137,7 @@ public class Game1 : Game
                 Part_c=1;
             }
             if(Part_b==1){// Du väljer kort.
+                SL[0].hand=SåDetSerBraUt(SL,0);
                 if(KortSomSkaUp>SL[0].hand.Count-1){
                     KortSomSkaUp=SL[0].hand.Count-1;// kan ge index out of range om jag inte gör detta.
                 }
@@ -137,13 +157,14 @@ public class Game1 : Game
                 }
                 if(kstate.IsKeyDown(Keys.Space)&&Space){ // du väljer ditt kort.
                     Space=false;
+                    // k423
                     Part_b=2;
                 }
                 for(int i=0;i<SL[0].hand.Count;i++){//Så korten går ner till orginal position om de inte ska vara uppe.
                     if(i!=KortSomSkaUp){
                         SL[0].hand[i].FlyttaY=800;
                     }else{
-                        SL[0].hand[i].FlyttaY=780;
+                        SL[0].hand[i].FlyttaY=750;
                     }
                 }    
             }
@@ -177,7 +198,7 @@ public class Game1 : Game
             if(Part_b==3){// du tar kort från den spelaren. eller tar från sjön.
                 if(Part_c==1){// för den ska till baka hit men för att se till så de inte har mer kort. i part c == 2.
                     int VadSkaHända = HarDeDetKortet(SL[VilkenSpelare].hand,SL[0].hand[KortSomSkaUp].Kort,VilkenSpelare);
-                    if(VadSkaHända==0){
+                    if(VadSkaHända==-1){
                         if(Sjön.Count>0){ // ta från sjön med animation.
                             SL[0].PosiKort=ran.Next(0,Sjön.Count);
                             Part_a=10;// skickar till animation.
@@ -221,13 +242,92 @@ public class Game1 : Game
             }
         }
         if(Part_a==2){
-            Console.WriteLine("part 2");
+            // ska göra allt med botarna.
+            /*
+                planen är att göra en klass med en list<string> i för att använda det som minne. men vi gör det senare. först ska vi få det att funka o jag kan fixa det med bättre botar senare.
+            */
+            if(Part_b==1){//bot nummer 1? eller alla i en. ta kort från spelare eller från sjön. Med animation kanske.
+                if(SL[1].hand.Count>0){// så länge handen inte är tom
+                    SL[1].PosiKort=Bot_VäljerKort(SL,1); // väljer kort. k423 du väljer ett kort och frågar så alla vet vem. k555
+                    SL[1].spelare=Bot_VäljerSpelare(SL,1); // väljer spelare. k555
+                    int test = HarDeDetKortet(SL[SL[1].spelare].hand,SL[1].hand[SL[1].PosiKort].Kort,SL[1].spelare);
+                    if(test==-1){
+                        if(Sjön.Count>0){ // så länge sjön inte är tom.
+                            int a = ran.Next(0,Sjön.Count); // väljer ett random kort från sjön.
+                            SL[1].hand.Add(Sjön[a]); // lägger till det i spelare 1 s hand
+                            Sjön.RemoveAt(a); // tar bort det kortet från sjön.
+                        } // k555 de tar från sjön. också viktigt.
+                        Part_b=2;//bot 2s tur. jag tängte först ha alla part a-c men om jag har alla kan det skapa fel där jag inte vill så jag lämnade det så.
+                    }else{
+                        for(int ii=0;ii<SL[SL[1].spelare].hand.Count;ii++){ // k555 här är informationen om hur många de hade.
+                            if(SL[SL[1].spelare].hand[ii].Kort==SL[1].hand[SL[1].PosiKort].Kort){
+                                SL[1].hand.Add(SL[SL[1].spelare].hand[ii]);
+                                SL[SL[1].spelare].hand.RemoveAt(ii);
+                                ii--;//om jag här den där så borde inget skippas.
+                            }
+                        }
+                        // ta kort från den spelare som du valt.
+                    }
+                }else{
+                    Part_b=2; // skickas till den andra boten.
+                }
+            }
+            if(Part_b==2){//samma som part b = 1 men med annan bot så när jag updaterat nästa så är det bara att göra samma sak här.
+                if(SL[2].hand.Count>0){
+                    SL[2].PosiKort=Bot_VäljerKort(SL,2); 
+                    SL[2].spelare=Bot_VäljerSpelare(SL,2);
+                    int test = HarDeDetKortet(SL[SL[2].spelare].hand,SL[2].hand[SL[2].PosiKort].Kort,SL[2].spelare);
+                    if(test==-1){
+                        if(Sjön.Count>0){
+                            int a = ran.Next(0,Sjön.Count);
+                            SL[2].hand.Add(Sjön[a]);
+                            Sjön.RemoveAt(a);
+                        }
+                        Part_b=3;
+                    }else{
+                        for(int ii=0;ii<SL[SL[2].spelare].hand.Count;ii++){
+                            if(SL[SL[2].spelare].hand[ii].Kort==SL[2].hand[SL[2].PosiKort].Kort){
+                                SL[2].hand.Add(SL[SL[2].spelare].hand[ii]);
+                                SL[SL[2].spelare].hand.RemoveAt(ii);
+                                ii--;
+                            }
+                        }
+                    }
+                }else{
+                    Part_b=3;
+                }
+            }
+            if(Part_b==3){
+                if(SL[3].hand.Count>0){
+                    SL[3].PosiKort=Bot_VäljerKort(SL,3); 
+                    SL[3].spelare=Bot_VäljerSpelare(SL,3);
+                    int test = HarDeDetKortet(SL[SL[3].spelare].hand,SL[3].hand[SL[3].PosiKort].Kort,SL[3].spelare);
+                    if(test==-1){
+                        if(Sjön.Count>0){
+                            int a = ran.Next(0,Sjön.Count);
+                            SL[2].hand.Add(Sjön[a]);
+                            Sjön.RemoveAt(a);
+                        }
+                        Part_b=1;
+                    }else{
+                        for(int ii=0;ii<SL[SL[3].spelare].hand.Count;ii++){
+                            if(SL[SL[3].spelare].hand[ii].Kort==SL[3].hand[SL[3].PosiKort].Kort){
+                                SL[3].hand.Add(SL[SL[3].spelare].hand[ii]);
+                                SL[SL[3].spelare].hand.RemoveAt(ii);
+                                ii--;
+                            }
+                        }
+                    }
+                }else{
+                    Part_b=1;
+                }
+            }
             Part_a=1;
             Part_b=1;
             Part_c=1;
         }
 
-        if(Part_a==10){ // animation.
+        if(Part_a==10){ // animation. för spelare. gör en ny för botarna.
             if(Part_b==1){ // för sjön. 
                 // och här
                 if(Part_c==0){
@@ -275,6 +375,18 @@ public class Game1 : Game
             }
             // om jag ska göra animation för rästen.
         }
+        if(Part_a==11){// animation för botarna.
+
+        }
+        if(Part_a==21){ // 21 & 22 & 23. 2 an är för att det inte ska riskira att användas fel och 1-3 för att visa vilken det är.
+            // jag ska använda dem för att skriva vad som händer i en ruta där man trycker space för att gå vidare.
+        }
+        if(Part_a==22){ // k555 vilken spelare som frågar får vi hav 2 1 eler 3 i 21,22,23.
+            
+        }
+        if(Part_a==23){
+            
+        }
 
         if(kstate.IsKeyUp(Keys.Left)&&kstate.IsKeyUp(Keys.Right)&&kstate.IsKeyUp(Keys.Space)){ // så man bara kan klicka en gång
             Space=true;
@@ -285,14 +397,8 @@ public class Game1 : Game
         base.Update(gameTime);
     }
 
-    static int VarÄrDetKortDuSöker(List<Spelare> SL,string kort,int v){
-        for(int i=0;i<SL[v].hand.Count;i++){
-            if(SL[v].hand[i].Kort == kort){
-                return i;
-            }
-        }
-        return -1; // borde inte komma hit ändå.
-    }
+    
+    
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.LightSeaGreen);
@@ -302,6 +408,7 @@ public class Game1 : Game
             _spriteBatch.Draw(pixel,k.rödrektangle,Color.Black);
             _spriteBatch.Draw(pixel,k.vitrektangle,Color.Red);
         }
+        // här ska vi ha så den ritat upp vad botarna gör.
         foreach(Kortvisuel Kort in SL[0].hand){ // ritar din hand.
             _spriteBatch.Draw(pixel,Kort.rödrektangle,Color.Red);
             _spriteBatch.Draw(pixel,Kort.vitrektangle,Color.White);
@@ -339,9 +446,30 @@ public class Game1 : Game
 
 
 
-
-
-    static List<Kortvisuel> SåDetSerBraUt(List<Spelare> SL,int v){
+    static int Bot_VäljerKort(List<Spelare> SL,int v){ // väljer ett kort. kan förbättras med minnet som jag pratade om innan.
+        Random ran = new Random();
+        return ran.Next(0,SL[v].hand.Count);
+    }
+    static int Bot_VäljerSpelare(List<Spelare> SL,int v){ // samma sak här. den kan förbettras med ett minne.
+        Random ran = new Random();
+        int a = ran.Next(0,4);
+        if(a==v){
+            return Bot_VäljerSpelare(SL,v);
+        }
+        if(SL[a].hand.Count<1){
+            return Bot_VäljerSpelare(SL,v);
+        }
+        return a;
+    }
+    static int VarÄrDetKortDuSöker(List<Spelare> SL,string kort,int v){ // hittar positionen för det kort du söker.
+        for(int i=0;i<SL[v].hand.Count;i++){
+            if(SL[v].hand[i].Kort == kort){
+                return i;
+            }
+        }
+        return -1; // borde inte komma hit ändå.
+    }
+    static List<Kortvisuel> SåDetSerBraUt(List<Spelare> SL,int v){ // sorterar och plaserar korten så de ser bra ut.
         int Y = 800;
         int gräns = 1200;
         List<Kortvisuel> New = new List<Kortvisuel>();
@@ -362,17 +490,15 @@ public class Game1 : Game
         }
         return New;
     }
-
-    static int HarDeDetKortet(List<Kortvisuel> Hand, string Kort, int spelare){// om det kortet finns i den handen.
+    static int HarDeDetKortet(List<Kortvisuel> Hand, string Kort, int DenAndraSpelare){// om det kortet finns i den handen.
         foreach(Kortvisuel k in Hand){
             if(k.Kort == Kort){
-                return spelare;
+                return DenAndraSpelare;
             }
         }
-        return 0;
+        return -1;
     }
-
-    static void TestaSpelareOchSjön(List<Spelare> SL, List<Kortvisuel> Sjön){
+    static void TestaSpelareOchSjön(List<Spelare> SL, List<Kortvisuel> Sjön){ // för att skriva up alla spelarnas händer och sjöns kort.
         foreach(Spelare s in SL){
             Console.WriteLine("Spelare "+s.vemärdu);
             foreach(Kortvisuel k in s.hand){
