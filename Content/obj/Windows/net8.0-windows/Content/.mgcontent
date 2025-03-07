@@ -4,9 +4,11 @@
   <Platform>Windows</Platform>
   <Config />
   <SourceFiles>
+    <File>C:/Users/alle07002/OneDrive - Växjö kommun/Skrivbordet/program/Version4_finns_i_sjon/Content/font2.spritefont</File>
     <File>C:/Users/alle07002/OneDrive - Växjö kommun/Skrivbordet/program/Version4_finns_i_sjon/Content/myfont.spritefont</File>
   </SourceFiles>
   <DestFiles>
+    <File xsi:nil="true" />
     <File xsi:nil="true" />
   </DestFiles>
 </SourceFileCollection>

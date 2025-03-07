@@ -13,6 +13,7 @@ public class Game1 : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private SpriteFont font;
+    private SpriteFont font2;
     private Texture2D pixel;
     private List<string> Kortlek = new List<string>{
         "Ess", "Ess", "Ess", "Ess", "2", "2", "2", "2", "3", "3", "3", "3",
@@ -20,6 +21,11 @@ public class Game1 : Game
         "7", "7", "7", "7", "8", "8", "8", "8", "9", "9", "9", "9",
         "10", "10", "10", "10", "Knäkt", "Knäkt", "Knäkt", "Knäkt",
         "Dam", "Dam", "Dam", "Dam", "Kung", "Kung", "Kung", "Kung"
+    };
+    private List<string> Namn = new List<string>{
+        "Texas","Alfred","Edvin","Kurt","Johan","Kent","Bert","Gunbrit","Olof","Åsa","Saga",
+        "Sosé","Abbe","Momme","José","Bära","Per","Olle","Sten","Sofia","Maja","Vivi","Benny"
+        ,"Dale","Bubben","Amir","Abdi","Brita"
     };
     public Game1()
     {
@@ -37,6 +43,7 @@ public class Game1 : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         font = Content.Load<SpriteFont>("myFont");
+        font2 = Content.Load<SpriteFont>("font2");
         // Skapa en 1x1 vit textur
         pixel = new Texture2D(GraphicsDevice, 1, 1);
         pixel.SetData(new[] { Color.White });
@@ -59,6 +66,15 @@ public class Game1 : Game
     // för animation
     private int anix;
     private int aniy;
+
+
+    // för textruta
+    // kan lägga dem i klassen om jag vill för att göra att allas moves skrivs ut i en ruta.
+    private bool TextRuta;//
+    private int TextVSpel;//
+    private int TextFrågarVem;//
+    private string TextKort;//
+    private int TextAntal=0;//
 
     /*
         för att säta "kapitel"
@@ -125,7 +141,13 @@ public class Game1 : Game
                 Kort.ÄndraLängd = 80;
                 Kort.ÄndraTjock = 50;
             }
-
+            SL[0].dittnamn="dig";
+            for(int i=1;i<4;i++){
+                int f = ran.Next(0,Namn.Count);
+                SL[i].dittnamn=Namn[f];
+                Namn.RemoveAt(f);
+            }
+            
             TestaSpelareOchSjön(SL,Sjön); // För att se så det inte är för många kort.
         }
         KeyboardState kstate = Keyboard.GetState();
@@ -226,13 +248,13 @@ public class Game1 : Game
                     Part_b=1;
                     Part_c=1;
                     List<int> test = new List<int>();
-                    for(int i=0;i<SL[SL[0].spelare].hand.Count;i++){//kollar varje kort i spelaren som du valde. det borde funka utan problem för du valde en spelare sen innan. i part c 1.
+                    for(int i=SL[SL[0].spelare].hand.Count-1;i>0;i--){//kollar varje kort i spelaren som du valde. det borde funka utan problem för du valde en spelare sen innan. i part c 1.
                         if(SL[SL[0].spelare].hand[i].Kort==SL[0].hand[KortSomSkaUp].Kort){
                             SL[0].hand.Add(SL[SL[0].spelare].hand[i]); // lägger till dem i din hand.
                             test.Add(i); // lägger i positionen av kortet som är lika i listan, för att sedan ta bort den.
                         }
-                    }
-                    foreach(int i in test){
+                    }                    
+                    foreach(int i in test){// börjar ta från slutet av handen för att inte flytta och ta fel kort.
                         SL[SL[0].spelare].hand.RemoveAt(i);
                     }
                     test.Clear();// behövs säkert inte men tar inga risker just nu.
@@ -242,97 +264,146 @@ public class Game1 : Game
             }
         }
         if(Part_a==2){
+            bool ÄrDeFärdiga = false; // för att botarna ska kunna köra igen.
             // ska göra allt med botarna.
             /*
-                planen är att göra en klass med en list<string> i för att använda det som minne. men vi gör det senare. först ska vi få det att funka o jag kan fixa det med bättre botar senare.
+                planen är att göra en klass med en list<string> i för att använda det som minne. men vi gör det senare. först ska vi få det att funka o jag kan fixa det med bättre botar senare
+                de kommer ha 4 listor i klassen spelare för varje spelare.
+                    med en method för att välja vilken som ska lägga till i.
             */
             if(Part_b==1){//bot nummer 1? eller alla i en. ta kort från spelare eller från sjön. Med animation kanske.
+                Console.WriteLine("Spelare "+Part_b);
                 if(SL[1].hand.Count>0){// så länge handen inte är tom
-                    SL[1].PosiKort=Bot_VäljerKort(SL,1); // väljer kort. k423 du väljer ett kort och frågar så alla vet vem. k555
+                    SL[1].PosiKort=Bot_VäljerKort(SL,1); // väljer kort. k423 du väljer ett kort och frågar så alla vet vem. k555 // du väljer kort.
                     SL[1].spelare=Bot_VäljerSpelare(SL,1); // väljer spelare. k555
+                    TextFrågarVem=SL[1].spelare;//k555
+                    TextVSpel=Part_b;//k555
+                    TextKort=SL[1].hand[SL[1].PosiKort].Kort;
                     int test = HarDeDetKortet(SL[SL[1].spelare].hand,SL[1].hand[SL[1].PosiKort].Kort,SL[1].spelare);
                     if(test==-1){
                         if(Sjön.Count>0){ // så länge sjön inte är tom.
                             int a = ran.Next(0,Sjön.Count); // väljer ett random kort från sjön.
                             SL[1].hand.Add(Sjön[a]); // lägger till det i spelare 1 s hand
                             Sjön.RemoveAt(a); // tar bort det kortet från sjön.
-                        } // k555 de tar från sjön. också viktigt.
-                        Part_b=2;//bot 2s tur. jag tängte först ha alla part a-c men om jag har alla kan det skapa fel där jag inte vill så jag lämnade det så.
+                            TextRuta=false;
+                            Part_a=21; // skicka för att göra text rutan. för att skriva att bot 1 tog från sjön.
+                            Part_b=-1;
+                            Part_c=1; // för att man inte ska skicka tillbaka till part b = 1;
+                        }else{
+                            Part_b=2;// skickar till bot 2.
+                        }// k555 de tar från sjön. också viktigt.
+                        // k555 ändra part_a till något för att göra rutan med text. och part b till -1 eller 0 för inget ska börja i denna.
                     }else{
                         for(int ii=0;ii<SL[SL[1].spelare].hand.Count;ii++){ // k555 här är informationen om hur många de hade.
                             if(SL[SL[1].spelare].hand[ii].Kort==SL[1].hand[SL[1].PosiKort].Kort){
                                 SL[1].hand.Add(SL[SL[1].spelare].hand[ii]);
                                 SL[SL[1].spelare].hand.RemoveAt(ii);
+                                TextAntal++;
                                 ii--;//om jag här den där så borde inget skippas.
                             }
                         }
-                        // ta kort från den spelare som du valt.
+                        TextRuta=true;
+                        Part_a=21;
+                        Part_b=-1;
+                        Part_c=2; // för att skicka till baka till part b = 1;
+                        // ändrar inte part för den ska köra igen.
                     }
                 }else{
                     Part_b=2; // skickas till den andra boten.
                 }
             }
             if(Part_b==2){//samma som part b = 1 men med annan bot så när jag updaterat nästa så är det bara att göra samma sak här.
+                Console.WriteLine("spelare " + Part_b);
                 if(SL[2].hand.Count>0){
                     SL[2].PosiKort=Bot_VäljerKort(SL,2); 
                     SL[2].spelare=Bot_VäljerSpelare(SL,2);
+                    TextFrågarVem=SL[2].spelare;//k555
+                    TextVSpel=Part_b;//k555
+                    TextKort=SL[2].hand[SL[2].PosiKort].Kort;
                     int test = HarDeDetKortet(SL[SL[2].spelare].hand,SL[2].hand[SL[2].PosiKort].Kort,SL[2].spelare);
                     if(test==-1){
                         if(Sjön.Count>0){
                             int a = ran.Next(0,Sjön.Count);
                             SL[2].hand.Add(Sjön[a]);
                             Sjön.RemoveAt(a);
-                        }
-                        Part_b=3;
+                            TextRuta=false;
+                            Part_a=22; // skicka för att göra text rutan. för att skriva att bot 1 tog från sjön.
+                            Part_b=-1;
+                            Part_c=1;
+                        }else{
+                           Part_b=3; 
+                        } 
                     }else{
                         for(int ii=0;ii<SL[SL[2].spelare].hand.Count;ii++){
                             if(SL[SL[2].spelare].hand[ii].Kort==SL[2].hand[SL[2].PosiKort].Kort){
                                 SL[2].hand.Add(SL[SL[2].spelare].hand[ii]);
                                 SL[SL[2].spelare].hand.RemoveAt(ii);
+                                TextAntal++;
                                 ii--;
                             }
                         }
+                        TextRuta=true;
+                        Part_a=22;
+                        Part_b=-1;
+                        Part_c=2;
                     }
                 }else{
                     Part_b=3;
                 }
             }
             if(Part_b==3){
+                Console.WriteLine("spelare " + Part_b);
                 if(SL[3].hand.Count>0){
                     SL[3].PosiKort=Bot_VäljerKort(SL,3); 
                     SL[3].spelare=Bot_VäljerSpelare(SL,3);
+                    TextFrågarVem=SL[3].spelare;//k555
+                    TextVSpel=Part_b;//k555
+                    TextKort=SL[3].hand[SL[3].PosiKort].Kort;
                     int test = HarDeDetKortet(SL[SL[3].spelare].hand,SL[3].hand[SL[3].PosiKort].Kort,SL[3].spelare);
                     if(test==-1){
                         if(Sjön.Count>0){
                             int a = ran.Next(0,Sjön.Count);
                             SL[2].hand.Add(Sjön[a]);
                             Sjön.RemoveAt(a);
+                            TextRuta=false;
+                            Part_a=23; // skicka för att göra text rutan. för att skriva att bot 1 tog från sjön.
+                            Part_b=-1;
+                            Part_c=1;
+                        }else{
+                            ÄrDeFärdiga=true;
                         }
-                        Part_b=1;
                     }else{
                         for(int ii=0;ii<SL[SL[3].spelare].hand.Count;ii++){
                             if(SL[SL[3].spelare].hand[ii].Kort==SL[3].hand[SL[3].PosiKort].Kort){
                                 SL[3].hand.Add(SL[SL[3].spelare].hand[ii]);
                                 SL[SL[3].spelare].hand.RemoveAt(ii);
+                                TextAntal++;
                                 ii--;
                             }
                         }
+                        TextRuta=true;
+                        Part_a=23;
+                        Part_b=-1;
+                        Part_c=2;
                     }
                 }else{
-                    Part_b=1;
+                    ÄrDeFärdiga=true;
                 }
             }
-            Part_a=1;
-            Part_b=1;
-            Part_c=1;
+            if(ÄrDeFärdiga){ // om bot 3 tog från sjön så blir det din tur igen.
+                Part_a=1;
+                Part_b=1;
+                Part_c=1;
+            }
+            
         }
 
         if(Part_a==10){ // animation. för spelare. gör en ny för botarna.
             if(Part_b==1){ // för sjön. 
                 // och här
                 if(Part_c==0){
-                    anix = (875-Sjön[SL[0].PosiKort].vitrektangle.X)/13;
-                    aniy = (1000-Sjön[SL[0].PosiKort].vitrektangle.Y)/13;
+                    anix = (875-Sjön[SL[0].PosiKort].vitrektangle.X)/20;
+                    aniy = (1000-Sjön[SL[0].PosiKort].vitrektangle.Y)/20;
                     Part_c=1;// för att starta animationen.
                 }
                 if(Part_c==1){
@@ -352,10 +423,9 @@ public class Game1 : Game
                 }
             }
             if(Part_b==2){// för bot 1.
-                Console.WriteLine("ddd"+Part_a+Part_b+Part_c);
                 if(Part_c==0){
-                    anix = (875-SL[SL[0].spelare].hand[SL[0].PosiKort].vitrektangle.X)/13;
-                    aniy = (1000-SL[SL[0].spelare].hand[SL[0].PosiKort].vitrektangle.Y)/13;
+                    anix = (875-SL[SL[0].spelare].hand[SL[0].PosiKort].vitrektangle.X)/20;
+                    aniy = (1000-SL[SL[0].spelare].hand[SL[0].PosiKort].vitrektangle.Y)/20;
                     Part_c=1;
                 }
                 if(Part_c==1){ // animationen.
@@ -380,12 +450,88 @@ public class Game1 : Game
         }
         if(Part_a==21){ // 21 & 22 & 23. 2 an är för att det inte ska riskira att användas fel och 1-3 för att visa vilken det är.
             // jag ska använda dem för att skriva vad som händer i en ruta där man trycker space för att gå vidare.
+            /*
+                kanske bara behöver en med
+                bool om de tar från sjön eller inte.
+                int vilken spelare.
+                int vem han frågar.
+                string vilket kort.
+                int hur många de hade.
+                    eller om du inte hade något och tog från sjön istället.
+                int vad part b va och ska bli.
+
+                text:
+                    if(bool true){
+                        Spelare (x) frågade spelare (y) efter (kort) och de hade (antal) st.
+                    }else{
+                        Spelare (x) frågade spelare (y) efter (kort) och de hade 0 st, så spelare (x) plockade från sjön.
+                    }
+                    
+            */
+            if(Part_c==1){ // bot 1 tog från sjön
+                if(kstate.IsKeyDown(Keys.Space)&&Space){
+                    Part_a=2;
+                    Part_b=2;
+                    Part_c=1;
+                    TextAntal=0;
+                    Space=false;
+                    TextRuta=true;
+                }
+            }
+            if(Part_c==2){
+                if(kstate.IsKeyDown(Keys.Space)&&Space){
+                    Part_a=2;
+                    Part_b=1;
+                    Part_c=1;
+                    TextAntal=0;
+                    Space=false;
+                    TextRuta=true;
+                }
+            }
         }
         if(Part_a==22){ // k555 vilken spelare som frågar får vi hav 2 1 eler 3 i 21,22,23.
-            
+            if(Part_c==1){ // bot 2 tog från sjön
+                if(kstate.IsKeyDown(Keys.Space)&&Space){
+                    Part_a=2;
+                    Part_b=3;
+                    Part_c=1;
+                    TextAntal=0;
+                    Space=false;
+                    TextRuta=true;
+                }
+            }
+            if(Part_c==2){
+                if(kstate.IsKeyDown(Keys.Space)&&Space){
+                    Part_a=2;
+                    Part_b=2;
+                    Part_c=1;
+                    TextAntal=0;
+                    Space=false;
+                    TextRuta=true;
+                }
+            }
         }
         if(Part_a==23){
-            
+            if(Part_c==1){ // bot 3 tog från sjön
+                if(kstate.IsKeyDown(Keys.Space)&&Space){
+                    Part_a=1;
+                    Part_b=1;
+                    Part_c=1;
+                    TextAntal=0;
+                    Space=false;
+                    TextRuta=true;
+                }
+            }
+            if(Part_c==2){
+                if(kstate.IsKeyDown(Keys.Space)&&Space){
+                    Part_a=2;
+                    Part_b=3;
+                    Part_c=1;
+                    TextAntal=0;
+                    Space=false;
+                    TextRuta=true;
+                }
+            }
         }
 
         if(kstate.IsKeyUp(Keys.Left)&&kstate.IsKeyUp(Keys.Right)&&kstate.IsKeyUp(Keys.Space)){ // så man bara kan klicka en gång
@@ -422,14 +568,33 @@ public class Game1 : Game
             if(Part_a==10&&Part_b==2&&Part_c==1){ // kan kanske ändra nollan så det är en varibial på vilkens tur det är.
                 _spriteBatch.Draw(pixel,SL[SL[0].spelare].hand[SL[0].PosiKort].rödrektangle,Color.Red);
             }
-            _spriteBatch.DrawString(font,SL[1].text,new Vector2(100,380),Color.Black);
+            _spriteBatch.DrawString(font,SL[1].dittnamn,new Vector2(100,380),Color.Black);
             _spriteBatch.DrawString(font,SL[1].hand.Count+"",new Vector2(130,420),Color.Black);
 
-            _spriteBatch.DrawString(font,SL[2].text,new Vector2(840,50),Color.Black);
+            _spriteBatch.DrawString(font,SL[2].dittnamn,new Vector2(840,50),Color.Black);
             _spriteBatch.DrawString(font,SL[2].hand.Count+"",new Vector2(870,90),Color.Black);
             
-            _spriteBatch.DrawString(font,SL[3].text,new Vector2(1550,380),Color.Black);
+            _spriteBatch.DrawString(font,SL[3].dittnamn,new Vector2(1550,380),Color.Black);
             _spriteBatch.DrawString(font,SL[3].hand.Count+"",new Vector2(1580,420),Color.Black);
+        }
+        if(Part_a==21||Part_a==22||Part_a==23){ // ritar ut rutan för det alla tar och hur många de får tag i.
+            _spriteBatch.Draw(pixel,new Rectangle(100,100,1600,800),Color.DimGray); // jag är sugen på o ge alla ett namn.
+            if(TextRuta){
+                _spriteBatch.DrawString(font2,SL[TextVSpel].dittnamn+" frågade "+SL[TextFrågarVem].dittnamn+" efter "+TextKort, new Vector2(200,200),Color.Black);
+                if(TextFrågarVem!=0){ 
+                    _spriteBatch.DrawString(font2,"och de hade "+TextAntal +"st.",new Vector2(300,300),Color.Black);
+                }else{
+                    _spriteBatch.DrawString(font2,"och du hade "+TextAntal +"st.",new Vector2(300,300),Color.Black);
+                }
+            }else{
+                if(TextFrågarVem!=0){
+                    _spriteBatch.DrawString(font2,SL[TextVSpel].dittnamn+" frågade "+SL[TextFrågarVem].dittnamn+" efter "+TextKort+" och de",new Vector2(200,200),Color.Black);                                                                    
+                }else{
+                    _spriteBatch.DrawString(font2,SL[TextVSpel].dittnamn+" frågade "+SL[TextFrågarVem].dittnamn+" efter "+TextKort+" och du",new Vector2(200,200),Color.Black);                                                                    
+                }
+                _spriteBatch.DrawString(font2,"hade 0 st, så "+SL[TextVSpel].dittnamn+" plockade från sjön.",new Vector2(200,300),Color.Black);
+            }
+            _spriteBatch.DrawString(font,"Tryck 'Space / mellan slag' för att gå vidare.", new Vector2(500,820),Color.Black);
         }
         _spriteBatch.End();
 
@@ -507,7 +672,8 @@ public class Game1 : Game
             Console.WriteLine();
         }
         foreach(Kortvisuel k in Sjön){
-                Console.Write(k.Kort + " ");
-            }
+            Console.Write(k.Kort + " ");
+        }
+        Console.WriteLine();
     }
 }

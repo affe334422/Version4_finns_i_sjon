@@ -10,12 +10,17 @@ namespace Fan_igen
     {
         private List<Kortvisuel> Hand = new List<Kortvisuel>();
         private int VemÄrDu;
+        private string Dittnamn;
         private int Poäng = 0;
 
         private int VilkenDuFrågar;
         private int PositionAvDetKort;
         public Spelare(int a){
             VemÄrDu = a;
+        }
+        public string dittnamn{
+            get{return Dittnamn;}
+            set{Dittnamn=value;}
         }
 
         public int spelare{
@@ -33,9 +38,7 @@ namespace Fan_igen
         public int vemärdu{
             get{return VemÄrDu;}
         }
-        public string text{
-            get{return "Spelare "+(VemÄrDu+1);}
-        }
+        
         public List<Kortvisuel> hand{
             set{Hand = value;}
             get{return Hand;}
