@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Fan_igen;
 using Finns_i_Monogame;
+using Microsoft.VisualBasic.ApplicationServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -25,7 +26,7 @@ public class Game1 : Game
     private List<string> Namn = new List<string>{
         "Texas","Alfred","Edvin","Kurt","Johan","Kent","Bert","Gunbrit","Olof","Åsa","Saga",
         "Sosé","Abbe","Momme","José","Bära","Per","Olle","Sten","Sofia","Maja","Vivi","Benny"
-        ,"Dale","Bubben","Amir","Abdi","Brita"
+        ,"Dale","Bubben","Amir","Abdi","Brita","Jesus"
     };
     public Game1()
     {
@@ -56,6 +57,7 @@ public class Game1 : Game
     private int Part_a = 1;
     private int Part_b = 1;
     private int Part_c = 1;
+    private int[] VilkaVinner = [0,1,2,3];
 
     // för spelare 1.
     private int KortSomSkaUp = 0;
@@ -153,42 +155,46 @@ public class Game1 : Game
         KeyboardState kstate = Keyboard.GetState();
         MouseState mstate = Mouse.GetState();
         if(Part_a==1){// Du gör dina saker.
-            if(SL[0].hand.Count<1){
+            if(SL[0].hand.Count<1&&Sjön.Count<1){
                 Part_a=2; // skickar så botarna kör för din hand är tom
                 Part_b=1;
                 Part_c=1;
-            }
-            if(Part_b==1){// Du väljer kort.
-                SL[0].hand=SåDetSerBraUt(SL,0);
-                if(KortSomSkaUp>SL[0].hand.Count-1){
-                    KortSomSkaUp=SL[0].hand.Count-1;// kan ge index out of range om jag inte gör detta.
-                }
-                if(kstate.IsKeyDown(Keys.Left)&&Space){// flytta vänster.
-                    KortSomSkaUp--;
-                    if(KortSomSkaUp<0){
-                        KortSomSkaUp=SL[0].hand.Count-1;
+            }else{
+                if(Part_b==1){// Du väljer kort.
+                    if(SL[0].hand.Count<1){
+                        ss
                     }
-                    Space=false;
-                }
-                if(kstate.IsKeyDown(Keys.Right)&&Space){// flytta höger
-                    KortSomSkaUp++;
+                    SL[0].hand=SåDetSerBraUt(SL,0);
                     if(KortSomSkaUp>SL[0].hand.Count-1){
-                        KortSomSkaUp=0;
+                        KortSomSkaUp=SL[0].hand.Count-1;// kan ge index out of range om jag inte gör detta.
                     }
-                    Space=false;
-                }
-                if(kstate.IsKeyDown(Keys.Space)&&Space){ // du väljer ditt kort.
-                    Space=false;
-                    // k423
-                    Part_b=2;
-                }
-                for(int i=0;i<SL[0].hand.Count;i++){//Så korten går ner till orginal position om de inte ska vara uppe.
-                    if(i!=KortSomSkaUp){
-                        SL[0].hand[i].FlyttaY=800;
-                    }else{
-                        SL[0].hand[i].FlyttaY=750;
+                    if(kstate.IsKeyDown(Keys.Left)&&Space){// flytta vänster.
+                        KortSomSkaUp--;
+                        if(KortSomSkaUp<0){
+                            KortSomSkaUp=SL[0].hand.Count-1;
+                        }
+                        Space=false;
                     }
-                }    
+                    if(kstate.IsKeyDown(Keys.Right)&&Space){// flytta höger
+                        KortSomSkaUp++;
+                        if(KortSomSkaUp>SL[0].hand.Count-1){
+                            KortSomSkaUp=0;
+                        }
+                        Space=false;
+                    }
+                    if(kstate.IsKeyDown(Keys.Space)&&Space){ // du väljer ditt kort.
+                        Space=false;
+                        // k423
+                        Part_b=2;
+                    }
+                    for(int i=0;i<SL[0].hand.Count;i++){//Så korten går ner till orginal position om de inte ska vara uppe.
+                        if(i!=KortSomSkaUp){
+                            SL[0].hand[i].FlyttaY=800;
+                        }else{
+                            SL[0].hand[i].FlyttaY=750;
+                        }
+                    }    
+                }
             }
             if(Part_b==2){// Du väljer spelare.
                 if(kstate.IsKeyDown(Keys.Left)&&Space){
@@ -397,7 +403,11 @@ public class Game1 : Game
             }
             
         }
-
+        KollaAlla4(SL);//ta bort de kort som är fyra.
+        VilkaVinner = Vinner(VilkaVinner,SL); // kollar vem som leder.
+        if(SL[0].hand.Count<1&&SL[1].hand.Count<1&&SL[2].hand.Count<1&&SL[3].hand.Count<1&&Sjön.Count<1){
+            Part_a=12;// alla kort är borta så någon van.
+        }
         if(Part_a==10){ // animation. för spelare. gör en ny för botarna.
             if(Part_b==1){ // för sjön. 
                 // och här
@@ -444,9 +454,6 @@ public class Game1 : Game
                 }
             }
             // om jag ska göra animation för rästen.
-        }
-        if(Part_a==11){// animation för botarna.
-
         }
         if(Part_a==21){ // 21 & 22 & 23. 2 an är för att det inte ska riskira att användas fel och 1-3 för att visa vilken det är.
             // jag ska använda dem för att skriva vad som händer i en ruta där man trycker space för att gå vidare.
@@ -543,58 +550,75 @@ public class Game1 : Game
         base.Update(gameTime);
     }
 
-    
-    
+    static int[] Vinner(int[] vv, List<Spelare> SL){
+        for(int sp=0;sp<3;sp++){
+            if(SL[vv[sp]].poäng<SL[vv[sp+1]].poäng){
+                int a=vv[sp];
+                vv[sp] = vv[sp+1];
+                vv[sp+1]=a;
+            }
+        }
+        return vv;
+    }
+
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.LightSeaGreen);
 
         _spriteBatch.Begin();
-        foreach(Kortvisuel k in Sjön){ // Ritar sjön.
-            _spriteBatch.Draw(pixel,k.rödrektangle,Color.Black);
-            _spriteBatch.Draw(pixel,k.vitrektangle,Color.Red);
-        }
-        // här ska vi ha så den ritat upp vad botarna gör.
-        foreach(Kortvisuel Kort in SL[0].hand){ // ritar din hand.
-            _spriteBatch.Draw(pixel,Kort.rödrektangle,Color.Red);
-            _spriteBatch.Draw(pixel,Kort.vitrektangle,Color.White);
-            _spriteBatch.DrawString(font,Kort.Kort,new Vector2(Kort.vitrektangle.X+10,Kort.vitrektangle.Y+10),Color.Black);
-        }
-        
-        if(true){// ritar spelare och antalet kort de har och flera andra saker.
-            if(Part_a==1&&Part_b==2&&Part_c==1){// gör en röd rektangel vid den du vill fråga.
-                _spriteBatch.Draw(pixel,SPV,Color.Red);
+        if(Part_a!=12){
+            foreach(Kortvisuel k in Sjön){ // Ritar sjön.
+                _spriteBatch.Draw(pixel,k.rödrektangle,Color.Black);
+                _spriteBatch.Draw(pixel,k.vitrektangle,Color.Red);
             }
-            if(Part_a==10&&Part_b==2&&Part_c==1){ // kan kanske ändra nollan så det är en varibial på vilkens tur det är.
-                _spriteBatch.Draw(pixel,SL[SL[0].spelare].hand[SL[0].PosiKort].rödrektangle,Color.Red);
+            // här ska vi ha så den ritat upp vad botarna gör.
+            foreach(Kortvisuel Kort in SL[0].hand){ // ritar din hand.
+                _spriteBatch.Draw(pixel,Kort.rödrektangle,Color.Red);
+                _spriteBatch.Draw(pixel,Kort.vitrektangle,Color.White);
+                _spriteBatch.DrawString(font,Kort.Kort,new Vector2(Kort.vitrektangle.X+10,Kort.vitrektangle.Y+10),Color.Black);
             }
-            _spriteBatch.DrawString(font,SL[1].dittnamn,new Vector2(100,380),Color.Black);
-            _spriteBatch.DrawString(font,SL[1].hand.Count+"",new Vector2(130,420),Color.Black);
-
-            _spriteBatch.DrawString(font,SL[2].dittnamn,new Vector2(840,50),Color.Black);
-            _spriteBatch.DrawString(font,SL[2].hand.Count+"",new Vector2(870,90),Color.Black);
             
-            _spriteBatch.DrawString(font,SL[3].dittnamn,new Vector2(1550,380),Color.Black);
-            _spriteBatch.DrawString(font,SL[3].hand.Count+"",new Vector2(1580,420),Color.Black);
-        }
-        if(Part_a==21||Part_a==22||Part_a==23){ // ritar ut rutan för det alla tar och hur många de får tag i.
-            _spriteBatch.Draw(pixel,new Rectangle(100,100,1600,800),Color.DimGray); // jag är sugen på o ge alla ett namn.
-            if(TextRuta){
-                _spriteBatch.DrawString(font2,SL[TextVSpel].dittnamn+" frågade "+SL[TextFrågarVem].dittnamn+" efter "+TextKort, new Vector2(200,200),Color.Black);
-                if(TextFrågarVem!=0){ 
-                    _spriteBatch.DrawString(font2,"och de hade "+TextAntal +"st.",new Vector2(300,300),Color.Black);
-                }else{
-                    _spriteBatch.DrawString(font2,"och du hade "+TextAntal +"st.",new Vector2(300,300),Color.Black);
+            if(true){// ritar spelare och antalet kort de har och flera andra saker.
+                if(Part_a==1&&Part_b==2&&Part_c==1){// gör en röd rektangel vid den du vill fråga.
+                    _spriteBatch.Draw(pixel,SPV,Color.Red);
                 }
-            }else{
-                if(TextFrågarVem!=0){
-                    _spriteBatch.DrawString(font2,SL[TextVSpel].dittnamn+" frågade "+SL[TextFrågarVem].dittnamn+" efter "+TextKort+" och de",new Vector2(200,200),Color.Black);                                                                    
-                }else{
-                    _spriteBatch.DrawString(font2,SL[TextVSpel].dittnamn+" frågade "+SL[TextFrågarVem].dittnamn+" efter "+TextKort+" och du",new Vector2(200,200),Color.Black);                                                                    
+                if(Part_a==10&&Part_b==2&&Part_c==1){ // kan kanske ändra nollan så det är en varibial på vilkens tur det är.
+                    _spriteBatch.Draw(pixel,SL[SL[0].spelare].hand[SL[0].PosiKort].rödrektangle,Color.Red);
                 }
-                _spriteBatch.DrawString(font2,"hade 0 st, så "+SL[TextVSpel].dittnamn+" plockade från sjön.",new Vector2(200,300),Color.Black);
+                _spriteBatch.DrawString(font,SL[1].dittnamn,new Vector2(100,380),Color.Black);
+                _spriteBatch.DrawString(font,SL[1].hand.Count+"",new Vector2(130,420),Color.Black);
+
+                _spriteBatch.DrawString(font,SL[2].dittnamn,new Vector2(840,50),Color.Black);
+                _spriteBatch.DrawString(font,SL[2].hand.Count+"",new Vector2(870,90),Color.Black);
+                
+                _spriteBatch.DrawString(font,SL[3].dittnamn,new Vector2(1550,380),Color.Black);
+                _spriteBatch.DrawString(font,SL[3].hand.Count+"",new Vector2(1580,420),Color.Black);
             }
-            _spriteBatch.DrawString(font,"Tryck 'Space / mellan slag' för att gå vidare.", new Vector2(500,820),Color.Black);
+            if(Part_a==21||Part_a==22||Part_a==23){ // ritar ut rutan för det alla tar och hur många de får tag i.
+                _spriteBatch.Draw(pixel,new Rectangle(100,100,1600,800),Color.DimGray); // jag är sugen på o ge alla ett namn.
+                if(TextRuta){
+                    _spriteBatch.DrawString(font2,SL[TextVSpel].dittnamn+" frågade "+SL[TextFrågarVem].dittnamn+" efter "+TextKort, new Vector2(200,200),Color.Black);
+                    if(TextFrågarVem!=0){ 
+                        _spriteBatch.DrawString(font2,"och de hade "+TextAntal +"st.",new Vector2(300,300),Color.Black);
+                    }else{
+                        _spriteBatch.DrawString(font2,"och du hade "+TextAntal +"st.",new Vector2(300,300),Color.Black);
+                    }
+                }else{
+                    if(TextFrågarVem!=0){
+                        _spriteBatch.DrawString(font2,SL[TextVSpel].dittnamn+" frågade "+SL[TextFrågarVem].dittnamn+" efter "+TextKort+" och de",new Vector2(200,200),Color.Black);                                                                    
+                    }else{
+                        _spriteBatch.DrawString(font2,SL[TextVSpel].dittnamn+" frågade "+SL[TextFrågarVem].dittnamn+" efter "+TextKort+" och du",new Vector2(200,200),Color.Black);                                                                    
+                    }
+                    _spriteBatch.DrawString(font2,"hade 0 st, så "+SL[TextVSpel].dittnamn+" plockade från sjön.",new Vector2(200,300),Color.Black);
+                }
+                _spriteBatch.DrawString(font,"Tryck 'Space / mellan slag' för att gå vidare.", new Vector2(500,820),Color.Black);
+            }
+        }else{
+            SL[0].dittnamn="Du";
+            _spriteBatch.DrawString(font2,SL[VilkaVinner[0]].dittnamn+" kom först med "+SL[VilkaVinner[0]].poäng+" poäng",new Vector2(300,300),Color.Black); 
+            _spriteBatch.DrawString(font2,SL[VilkaVinner[1]].dittnamn+" kom tvåa med "+SL[VilkaVinner[1]].poäng+" poäng",new Vector2(300,400),Color.Black); 
+            _spriteBatch.DrawString(font2,SL[VilkaVinner[2]].dittnamn+" kom trea med "+SL[VilkaVinner[2]].poäng+" poäng",new Vector2(300,500),Color.Black); 
+            _spriteBatch.DrawString(font2,SL[VilkaVinner[3]].dittnamn+" kom sist med "+SL[VilkaVinner[3]].poäng+" poäng",new Vector2(300,600),Color.Black); 
         }
         _spriteBatch.End();
 
@@ -610,7 +634,31 @@ public class Game1 : Game
 
 
 
-
+    static void KollaAlla4(List<Spelare> SL){
+        for(int i = 0;i<4;i++){
+            List<string> DinaKOrt = new List<string>();
+            List<int> nummer = new List<int>();
+            for(int a=0;a<SL[i].hand.Count;a++){
+                DinaKOrt.Add(SL[i].hand[a].Kort);
+            }
+            string[] Kort = {"2","3","4","5","6","7","8","9","10","Knäkt","Dam","Kung","Ess"};
+            foreach(string k in Kort){
+                int antal = DinaKOrt.FindAll(l => l == k).Count;
+                if(antal==4){
+                    for(int b=SL[i].hand.Count-1;b>-1;b--){
+                        if(SL[i].hand[b].Kort==k){
+                            nummer.Add(b);
+                        }
+                    }
+                    for(int kk=0;kk<4;kk++){
+                        SL[i].hand.RemoveAt(nummer[kk]);
+                    }
+                    SL[i].poäng=1;
+                }               
+            }
+        }
+    }
+    
     static int Bot_VäljerKort(List<Spelare> SL,int v){ // väljer ett kort. kan förbättras med minnet som jag pratade om innan.
         Random ran = new Random();
         return ran.Next(0,SL[v].hand.Count);
