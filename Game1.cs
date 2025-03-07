@@ -162,7 +162,7 @@ public class Game1 : Game
             }else{
                 if(Part_b==1){// Du väljer kort.
                     if(SL[0].hand.Count<1){
-                        ss
+                        SL[0].hand.Add(Sjön[ran.Next(0,Sjön.Count)]); // göra det med resten.
                     }
                     SL[0].hand=SåDetSerBraUt(SL,0);
                     if(KortSomSkaUp>SL[0].hand.Count-1){
@@ -279,6 +279,9 @@ public class Game1 : Game
             */
             if(Part_b==1){//bot nummer 1? eller alla i en. ta kort från spelare eller från sjön. Med animation kanske.
                 Console.WriteLine("Spelare "+Part_b);
+                if(SL[1].hand.Count<1&&Sjön.Count>0){
+                    SL[1].hand.Add(Sjön[ran.Next(0,Sjön.Count)]);
+                }
                 if(SL[1].hand.Count>0){// så länge handen inte är tom
                     SL[1].PosiKort=Bot_VäljerKort(SL,1); // väljer kort. k423 du väljer ett kort och frågar så alla vet vem. k555 // du väljer kort.
                     SL[1].spelare=Bot_VäljerSpelare(SL,1); // väljer spelare. k555
@@ -320,6 +323,9 @@ public class Game1 : Game
             }
             if(Part_b==2){//samma som part b = 1 men med annan bot så när jag updaterat nästa så är det bara att göra samma sak här.
                 Console.WriteLine("spelare " + Part_b);
+                if(SL[2].hand.Count<1&&Sjön.Count>0){
+                    SL[2].hand.Add(Sjön[ran.Next(0,Sjön.Count)]);
+                }
                 if(SL[2].hand.Count>0){
                     SL[2].PosiKort=Bot_VäljerKort(SL,2); 
                     SL[2].spelare=Bot_VäljerSpelare(SL,2);
@@ -359,6 +365,9 @@ public class Game1 : Game
             }
             if(Part_b==3){
                 Console.WriteLine("spelare " + Part_b);
+                if(SL[3].hand.Count<1&&Sjön.Count>0){
+                    SL[3].hand.Add(Sjön[ran.Next(0,Sjön.Count)]);
+                }
                 if(SL[3].hand.Count>0){
                     SL[3].PosiKort=Bot_VäljerKort(SL,3); 
                     SL[3].spelare=Bot_VäljerSpelare(SL,3);
@@ -595,6 +604,9 @@ public class Game1 : Game
                 _spriteBatch.DrawString(font,SL[3].hand.Count+"",new Vector2(1580,420),Color.Black);
             }
             if(Part_a==21||Part_a==22||Part_a==23){ // ritar ut rutan för det alla tar och hur många de får tag i.
+                /*
+                    vet inte hur jag ska göra det men om jag kan spara informationen i en klass till exempel så kan jag skriva all information i en ruta istället för tre.
+                */
                 _spriteBatch.Draw(pixel,new Rectangle(100,100,1600,800),Color.DimGray); // jag är sugen på o ge alla ett namn.
                 if(TextRuta){
                     _spriteBatch.DrawString(font2,SL[TextVSpel].dittnamn+" frågade "+SL[TextFrågarVem].dittnamn+" efter "+TextKort, new Vector2(200,200),Color.Black);
