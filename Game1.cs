@@ -212,7 +212,7 @@ public class Game1 : Game
                     Space=false;
                 }
                 if(VilkenSpelare==1){
-                    SPV = new Rectangle(90,370,160,100);
+                    SPV = new Rectangle(90,370,160,100);// gör en röd rektangel bakom den du väljer.
                 }if(VilkenSpelare==2){
                     SPV = new Rectangle(830,40,160,100);
                 }if(VilkenSpelare==3){
@@ -279,7 +279,7 @@ public class Game1 : Game
             */
             if(Part_b==1){//bot nummer 1? eller alla i en. ta kort från spelare eller från sjön. Med animation kanske.
                 Console.WriteLine("Spelare "+Part_b);
-                if(SL[1].hand.Count<1&&Sjön.Count>0){
+                if(SL[1].hand.Count<1&&Sjön.Count>0){ // om handen är tom på grund av att den fick 4 och de korten försvann men det finns fortfarande i sjön, så tar den ett kort från sjön.
                     SL[1].hand.Add(Sjön[ran.Next(0,Sjön.Count)]);
                 }
                 if(SL[1].hand.Count>0){// så länge handen inte är tom
@@ -312,7 +312,7 @@ public class Game1 : Game
                             }
                         }
                         TextRuta=true;
-                        Part_a=21;
+                        Part_a=21; // skickar så den gör textrutan för vad den gör.
                         Part_b=-1;
                         Part_c=2; // för att skicka till baka till part b = 1;
                         // ändrar inte part för den ska köra igen.
@@ -323,7 +323,7 @@ public class Game1 : Game
             }
             if(Part_b==2){//samma som part b = 1 men med annan bot så när jag updaterat nästa så är det bara att göra samma sak här.
                 Console.WriteLine("spelare " + Part_b);
-                if(SL[2].hand.Count<1&&Sjön.Count>0){
+                if(SL[2].hand.Count<1&&Sjön.Count>0){ 
                     SL[2].hand.Add(Sjön[ran.Next(0,Sjön.Count)]);
                 }
                 if(SL[2].hand.Count>0){
