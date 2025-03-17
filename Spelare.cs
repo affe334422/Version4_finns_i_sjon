@@ -12,12 +12,13 @@ namespace Fan_igen
         private int VemÄrDu;
         private string Dittnamn;
         private int Poäng = 0;
-
         private int VilkenDuFrågar;
         private int PositionAvDetKort;
+        private int DetKortDuValt = 0;
         public Spelare(int a){
             VemÄrDu = a;
         }
+        public int KortSomSkaUp{set=>DetKortDuValt=value;get=>DetKortDuValt;}
         public string dittnamn{
             get{return Dittnamn;}
             set{Dittnamn=value;}
